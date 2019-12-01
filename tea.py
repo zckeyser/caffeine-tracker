@@ -7,14 +7,7 @@ from math import floor
 import os
 import sys
 from s3_helper import s3_persist_file
-
-def log_brew(filepath, tea_type, tea_country):
-    if not os.path.exists(os.path.expanduser("~/.drinks")):
-        os.makedirs(os.path.expanduser("~/.drinks"), True)
-
-    # format <timestamp>|<tea_type>|<tea_country>
-    with open(filepath, "a") as f:
-        f.write(f'{datetime.fromtimestamp(time())}|{tea_type}|{tea_country}\n')
+from log_session import log_session
 
 def main(args):
     if args.type not in ["puerh", "sheng", "shou", "black", "green", "white", "oolong", "herbal", "other"]:
@@ -26,7 +19,7 @@ def main(args):
             sys.exit()
 
     s3_persist_file(
-        lambda filename: log_brew(filename, args.type, args.country),
+        lambda filename: log_session(filename, args.type, args.country),
         "tea.psv",
         args.bucket_name
     )

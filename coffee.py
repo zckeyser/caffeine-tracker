@@ -7,6 +7,7 @@ from math import floor
 import os
 import sys
 from s3_helper import s3_persist_file
+from log_coffee import log_coffee_session
 
 def print_in_place(s):
     print(s.ljust(40, ' '), end='\r')
@@ -15,12 +16,6 @@ def print_in_place(s):
 def notification():
     #TODO use env var for this
     playsound(os.path.expanduser("~/programming/caffeine-tracker/notification.mp3"))
-
-
-def brew_finish(filepath, brew_time, country):
-    # format <timestamp>|<brew_time>
-    with open(filepath, "a") as f:
-        f.write(f'{datetime.fromtimestamp(time())}|{country}\n')
 
 
 def main(args):
@@ -44,13 +39,10 @@ def main(args):
 
         sleep(1)
 
-    s3_persist_file(
-        lambda filepath: brew_finish(filepath, args.brew_time, args.country),
-        'coffee.psv',
-        args.bucket_name
-    )
+    log_coffee_session(args.country, args.bucket_name)
     notification()
     print("Done brewing!" + ' ' * 20)
+
 
 def _parse_args():
     parser = ArgumentParser()
@@ -71,6 +63,7 @@ def _parse_args():
     parser.add_argument("country", help="Origin country of coffee")
 
     return parser.parse_args()
+
 
 if __name__ == "__main__":
     main(_parse_args())
