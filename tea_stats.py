@@ -2,9 +2,7 @@ from datetime import datetime, timedelta
 from argparse import ArgumentParser
 from os.path import expanduser
 import os
-import boto3
-
-s3_client = boto3.client('s3')
+from s3_helper import s3_persist_file
 
 class TeaSession():
     def __init__(self, timestamp, tea_type, tea_country):
@@ -43,50 +41,9 @@ def _parse_row(row):
 
     return TeaSession(timestamp, tea_type, tea_country)
 
-def upload_file(file_name, bucket, object_name=None):
-    """Upload a file to an S3 bucket
-
-    :param file_name: File to upload
-    :param bucket: Bucket to upload to
-    :param object_name: S3 object name. If not specified then file_name is used
-    :return: True if file was uploaded, else False
-    """
-
-    # If S3 object_name was not specified, use file_name
-    if object_name is None:
-        object_name = file_name
-
-    # Upload the file
-    s3_client = boto3.client('s3')
-    try:
-        response = s3_client.upload_file(file_name, bucket, object_name)
-    except ClientError as e:
-        logging.error(e)
-        return False
-    return True
-
-
-def _s3_persist_file(func, file_name):
-    filepath = f".tmp/{file_name}"
-
-    os.makedirs(".tmp", True)
-
-    # load file from s3 into temp file
-    s3_client.download_file("caffeine-tracker", "tea.psv", filepath)
-
-    # call function with location of file
-    func(filepath)
-
-    # copy back into s3
-    upload_file(filepath)
-
-    # remove temp file
-    os.remove(filepath)
-
-
-def main(args):
+def stats(filepath, verbose, very_verbose):
     data = None
-    with open(expanduser(f"~/.drinks/tea.psv")) as f:
+    with open(filepath) as f:
         data = [_parse_row(line) for line in f.readlines()]
 
     # base stats
@@ -108,7 +65,7 @@ def main(args):
     print()
 
     # verbose stats
-    if args.v or args.vv:
+    if verbose or very_verbose:
         print("================= BY TYPE ====================")
         print()
 
@@ -127,8 +84,14 @@ def main(args):
         print()
 
     # very verbose stats
-    if args.vv:
+    if very_verbose:
         print("Not implemented yet!")
+
+def main(args):
+    s3_persist_file(
+        lambda filepath: stats(filepath, args.v, args.vv),
+        "tea.psv"
+    )
 
 def _parse_args():
     parser = ArgumentParser()
