@@ -91,7 +91,6 @@ def s3_persist_file(func, file_name, bucket_name=None):
     if not os.path.exists(directory):
         os.makedirs(directory, True)
 
-    # TODO genericize this somehow
     bucket = get_or_create_bucket_name(bucket_name)
 
     create_bucket_if_not_exists(bucket)
