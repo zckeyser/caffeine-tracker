@@ -13,7 +13,7 @@ def print_in_place(s):
 def notification():
     playsound(os.path.expanduser("~/programming/caffeine-tracker/notification.mp3"))
 
-def brew_finish(brew_time):
+def brew_finish(brew_time, country):
     logdir = os.path.expanduser("~/.drinks")
     if not os.path.exists(logdir):
         os.makedirs(logdir, True)
