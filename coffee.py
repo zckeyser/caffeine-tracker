@@ -6,20 +6,20 @@ from datetime import datetime
 from math import floor
 import os
 import sys
+from s3_helper import s3_persist_file
 
 def print_in_place(s):
     print(s.ljust(40, ' '), end='\r')
 
+
 def notification():
+    #TODO use env var for this
     playsound(os.path.expanduser("~/programming/caffeine-tracker/notification.mp3"))
 
-def brew_finish(brew_time, country):
-    logdir = os.path.expanduser("~/.drinks")
-    if not os.path.exists(logdir):
-        os.makedirs(logdir, True)
 
+def brew_finish(filepath, brew_time, country):
     # format <timestamp>|<brew_time>
-    with open(f'{logdir}/coffee.psv', "a") as f:
+    with open(filepath, "a") as f:
         f.write(f'{datetime.fromtimestamp(time())}|{country}\n')
 
 
@@ -38,23 +38,35 @@ def main(args):
         mins_left = brew_mins - (t // 60)
         secs_left = (args.brew_time - t) % 60
         if mins_left > 0:
-            print_in_place(f"\rBrew timer: {mins_left}m{secs_left}s")
+            print_in_place(f"Brew timer: {mins_left}m{secs_left}s")
         else:
-            print_in_place(f"\rBrew timer: {secs_left}s")
+            print_in_place(f"Brew timer: {secs_left}s")
 
         sleep(1)
 
-    brew_finish(args.brew_time, args.country)
+    s3_persist_file(
+        lambda filepath: brew_finish(filepath, args.brew_time, args.country),
+        'coffee.psv',
+        args.bucket_name
+    )
     notification()
     print("Done brewing!" + ' ' * 20)
 
 def _parse_args():
     parser = ArgumentParser()
 
-    parser.add_argument("--brew-time",
-    type=int,
-    default=150,
-    help="Time spent brewing after the initial pre-stir 30s")
+    parser.add_argument(
+        "--brew-time",
+        type=int,
+        default=150,
+        help="Time spent brewing after the initial pre-stir 30s"
+    )
+
+    parser.add_argument(
+        "--bucket-name",
+        default=None,
+        help="Bucket to base s3 persistence off of -- only need to pass once. If this is left empty and there is no cache at ~/.drinks/bucket.txt then this will create a new bucket."
+    )
 
     parser.add_argument("country", help="Origin country of coffee")
 
