@@ -28,7 +28,7 @@ def upload_file(file_name, bucket, object_name=None):
         object_name = file_name
 
     # Upload the file
-    s3_client = boto3.client('s3')
+    s3_client = boto3.client("s3", region_name="us-east-2")
     try:
         response = s3_client.upload_file(file_name, bucket, object_name)
     except ClientError as e:
@@ -44,6 +44,7 @@ def create_bucket_definition_file(bucket_name, filepath):
 
 def get_or_create_bucket_name(bucket_name=None):
     """
+
     """
     # persist the name to a local file so we can refer back to it
     filepath = os.path.expanduser("~/.drinks/bucket.txt")
@@ -59,7 +60,7 @@ def get_or_create_bucket_name(bucket_name=None):
 
     if stored_name:
         return stored_name
-    
+
     bucket_name = f"caffeine-tracker-{uuid4()}"
     create_bucket_definition_file(bucket_name, filepath)
 
@@ -75,7 +76,7 @@ def create_bucket_if_not_exists(bucket_name):
     except Exception as e:
         print("Bucket {bucket_name} does not exist. Creating...")
     
-    s3_resource = boto3.resource('s3')
+    s3_resource = boto3.resource('s3', region_name='us-east-2')
 
     s3_resource.create_bucket(
         ACL="public-read-write",
