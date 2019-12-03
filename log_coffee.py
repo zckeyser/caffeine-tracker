@@ -9,9 +9,9 @@ from s3_helper import s3_persist_file
 
 def log_coffee_session(country, bucket_name):
     s3_persist_file(
-        lambda filepath: log_session("coffee.psv", args.country),
+        lambda filepath: log_session("coffee.psv", country),
         'coffee.psv',
-        args.bucket_name
+        bucket_name
     )
 
 def _parse_args():

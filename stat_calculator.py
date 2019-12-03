@@ -4,9 +4,10 @@ from os.path import expanduser
 import os
 from s3_helper import s3_persist_file
 
-class CoffeeSession():
-    def __init__(self, timestamp, tea_country):
+class TeaSession():
+    def __init__(self, timestamp, tea_type, tea_country):
         self.timestamp = timestamp
+        self.type = tea_type
         self.country = tea_country
 
 
@@ -30,25 +31,21 @@ class DataSet():
         else:
             self.data[key] = [1, [item]]
 
+def parse_drink_name(filepath):
+    return filepath.split('/')[-1].split('.')[0]
 
-def _parse_row(row):
-    cols = row.strip().split("|")
-
-    timestamp = datetime.strptime(cols[0], "%Y-%m-%d %H:%M:%S.%f")
-    coffee_country = cols[1]
-
-    return CoffeeSession(timestamp, coffee_country)
-
-def stats(filepath, verbose, very_verbose):
+def stats(filepath, cols, verbose, very_verbose):
     data = None
     with open(filepath) as f:
         data = [_parse_row(line) for line in f.readlines()]
 
     # base stats
     by_day = DataSet(lambda x: x.timestamp.date())
+    by_type = DataSet(lambda x: x.type)
     by_country = DataSet(lambda x: x.country)
     for session in data:
         by_day.update(session)
+        by_type.update(session)
         by_country.update(session)
     
     past_week_count = sum([cnt for date, (cnt, _) in by_day.items() if date >= datetime.now().date() - timedelta(days=7)])
@@ -56,17 +53,24 @@ def stats(filepath, verbose, very_verbose):
 
     print("================= BASE STATS =====================")
     print()
-    print(f"Cups of coffee drank in the past week: {past_week_count}")
-    print(f"Overall cups of coffee drank: {total_count}")
+    print(f"Cups of tea drank in the past week: {past_week_count}")
+    print(f"Overall cups of tea drank: {total_count}")
     print()
 
     # verbose stats
     if verbose or very_verbose:
+        print("================= BY TYPE ====================")
+        print()
+
+        # print cups by type
+        for tea_type, (cnt, _) in by_type.items():
+            print(f"{tea_type}: {cnt}")
+
         print()
         print("================= BY COUNTRY =================")
         print()
 
-        # print sessions by country of origin
+        # print cups by country
         for country, (cnt, _) in by_country.items():
             print(f"{country}: {cnt}")
 
@@ -75,29 +79,3 @@ def stats(filepath, verbose, very_verbose):
     # very verbose stats
     if very_verbose:
         print("Not implemented yet!")
-
-def main(args):
-    s3_persist_file(
-        lambda filepath: stats(filepath, args.v, args.vv),
-        "coffee.psv"
-    )
-
-def _parse_args():
-    parser = ArgumentParser()
-
-    parser.add_argument("-v",
-                        default=False,
-                        action='store_true',
-                        help="moderate verbosity flag"
-    )
-
-    parser.add_argument("-vv",
-                        default=False,
-                        action='store_true',
-                        help="full verbosity flag"
-    )
-
-    return parser.parse_args()
-
-if __name__ == "__main__":
-    main(_parse_args())
