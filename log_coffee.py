@@ -9,7 +9,7 @@ from s3_helper import s3_persist_file
 
 def log_coffee_session(country, bucket_name):
     s3_persist_file(
-        lambda filepath: log_session("coffee.psv", country),
+        lambda filepath: log_session(filepath, country),
         'coffee.psv',
         bucket_name
     )
