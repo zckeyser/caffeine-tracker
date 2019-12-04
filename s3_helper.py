@@ -104,6 +104,8 @@ def s3_persist_file(func, file_name, bucket_name=None):
         # create the file locally if it doesn't exist in s3
         open(filepath, "a").close()
 
+    print(f"Loaded file from s3://{bucket}/{file_name} to {filepath}")
+
     # call function with location of file
     func(filepath)
 
