@@ -1,3 +1,6 @@
+"""
+used to log arbitrary columns to a .psv file in the correct format with a timestamp prepended
+"""
 from datetime import datetime
 from time import time
 

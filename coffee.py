@@ -1,20 +1,19 @@
 #!/bin/python
-from playsound import playsound
 from argparse import ArgumentParser
-from time import sleep, time
-from datetime import datetime
 from math import floor
 import os
-import sys
-from s3_helper import s3_persist_file
+
+from playsound import playsound
+
 from log_coffee import log_coffee_session
+
 
 def print_in_place(s):
     print(s.ljust(40, ' '), end='\r')
 
 
 def notification():
-    #TODO use env var for this
+    # TODO use env var for this
     playsound(os.path.expanduser("~/programming/caffeine-tracker/notification.mp3"))
 
 

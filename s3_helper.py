@@ -1,10 +1,15 @@
+"""
+Module for s3 helpers, particularly around downloading, changing then re-uploading a file
+"""
 import os
-import sys
-import boto3
 from uuid import uuid4
+
+import boto3
 
 from logger import get_logger
 LOGGER = get_logger()
+
+# TODO private methods where appropriate
 
 
 def key_exists(client, bucket, key):
