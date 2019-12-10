@@ -13,7 +13,10 @@ def get_logger(filepath=None):
 
     if not filepath:
         userdir = os.path.expanduser("~")
-        os.path.join(userdir, ".drinks", "drinks.log")
+        filepath = os.path.join(userdir, ".drinks", "drinks.log")
+
+    if not os.path.exists(os.path.dirname(filepath)):
+        os.makedirs(os.path.dirname(filepath))
 
     fh = logging.FileHandler(filepath)
     fh.setLevel(logging.DEBUG)
