@@ -1,8 +1,11 @@
 import os
 import sys
 import boto3
-import logging
 from uuid import uuid4
+
+from logger import get_logger
+LOGGER = get_logger()
+
 
 def key_exists(client, bucket, key):
     """return the key's size if it exist, else None"""
@@ -13,6 +16,7 @@ def key_exists(client, bucket, key):
     for obj in response.get('Contents', []):
         if obj['Key'] == key:
             return obj['Size'] is not None
+
 
 def upload_file(file_name, bucket, object_name=None):
     """Upload a file to an S3 bucket
@@ -75,7 +79,7 @@ def create_bucket_if_not_exists(bucket_name):
         return
     except Exception as e:
         print("Bucket {bucket_name} does not exist. Creating...")
-    
+
     s3_resource = boto3.resource('s3', region_name='us-east-2')
 
     s3_resource.create_bucket(
@@ -104,7 +108,7 @@ def s3_persist_file(func, file_name, bucket_name=None):
         # create the file locally if it doesn't exist in s3
         open(filepath, "a").close()
 
-    print(f"Loaded file from s3://{bucket}/{file_name} to {filepath}")
+    LOGGER.debug(f"Loaded file from s3://{bucket}/{file_name} to {filepath}")
 
     # call function with location of file
     func(filepath)
