@@ -67,14 +67,14 @@ def stats(filepath, verbose, very_verbose):
         print()
 
         # print sessions by country of origin
-        for country, (cnt, _) in by_country.items():
+        for country, (cnt, _) in sorted(by_country.items(), key=lambda x: x[0]):
             print(f"{country}: {cnt}")
 
         print()
 
     # very verbose stats
     if very_verbose:
-        print("Not implemented yet!")
+        pass
 
 def main(args):
     s3_persist_file(

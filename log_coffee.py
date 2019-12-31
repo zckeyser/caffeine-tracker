@@ -25,4 +25,4 @@ def _parse_args():
 
 if __name__ == "__main__":
     args = _parse_args()
-    
+    log_coffee_session(args.country, args.bucket_name)
