@@ -1,9 +1,9 @@
-import os
-from datetime import datetime
-from time import time
+"""
+Logs a session of coffee drinking, just some boilerplate to call log_session
+"""
 from argparse import ArgumentParser
 from log_session import log_session
-from os.path import expanduser
+
 from s3_helper import s3_persist_file
 
 
@@ -14,11 +14,16 @@ def log_coffee_session(country, bucket_name):
         bucket_name
     )
 
+
 def _parse_args():
     parser = ArgumentParser()
 
     parser.add_argument("country", help="Origin country of coffee")
-    parser.add_argument("--bucket-name", help="Bucket to persist to in case you don't have a cached bucket and don't want to create a new one")
+    parser.add_argument(
+        "--bucket-name",
+        help="Bucket to persist to in case you don't have a cached bucket"
+        "and don't want to create a new one. Location of bucket cache is the file ~/.drinks/bucket.txt"
+    )
 
     return parser.parse_args()
 
